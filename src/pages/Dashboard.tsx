@@ -196,8 +196,8 @@ export default function Dashboard({
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-fade-in">
-      {/* Cabeçalho */}
+    // AJUSTE 1: Aumentei o padding (p-8) e adicionei pt-8 para afastar do topo/menu
+    <div className="space-y-6 p-8 pb-12 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Visão Geral</h2>
@@ -263,7 +263,6 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* GRID ALTERADO PARA 5 COLUNAS PARA CABER O NOVO FILTRO */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-600 flex items-center gap-1">
@@ -325,7 +324,6 @@ export default function Dashboard({
             />
           </div>
 
-          {/* NOVO FILTRO: Itens por Página */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-600 flex items-center gap-1">
               <List size={14} /> Itens por Pág.
@@ -333,7 +331,6 @@ export default function Dashboard({
             <select
               className="w-full p-2.5 border border-slate-300 rounded-lg bg-white"
               value={filters.pageSize}
-              // Garante que atualiza o filtro e limita visualmente a 100
               onChange={(e: any) =>
                 setFilters({ ...filters, pageSize: parseInt(e.target.value) })
               }
@@ -450,7 +447,8 @@ export default function Dashboard({
               <tr>
                 <th className="w-12 px-4 py-3"></th>
                 <th className="w-32 px-6 py-3 font-medium">Data</th>
-                <th className="w-32 px-6 py-3 font-medium">Registro</th>
+                {/* AJUSTE 2: Aumentei a largura da coluna Registro para w-48 */}
+                <th className="w-48 px-6 py-3 font-medium">Registro</th>
                 <th className="px-6 py-3 font-medium">
                   {filters.modo === "cia" ? "Companhia" : "Unidade"}
                 </th>
@@ -505,9 +503,15 @@ export default function Dashboard({
                       <td className="px-6 py-3 font-medium text-slate-700 align-middle">
                         {item.dia}
                       </td>
-                      <td className="px-6 py-3 text-slate-600 align-middle">
+
+                      {/* AJUSTE 3: Adicionei whitespace-nowrap para não quebrar o número */}
+                      <td
+                        className="px-6 py-3 text-slate-600 align-middle font-mono text-xs whitespace-nowrap"
+                        title={item.NumOrdemInterrupcao}
+                      >
                         {item.NumOrdemInterrupcao}
                       </td>
+
                       <td className="px-6 py-3 text-slate-600 font-medium align-middle">
                         {filters.modo === "cia"
                           ? item.NomAgenteRegulado

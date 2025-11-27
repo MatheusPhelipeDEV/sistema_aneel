@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-// CORREÇÃO: Importando do caminho certo (mesma pasta)
+// Usando HashRouter para compatibilidade total com GitHub Pages
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+// Importando a configuração da API (que define se é localhost ou render)
 import { api } from "./api";
 
 import { Menu } from "./components/Menu";
 import Dashboard from "./pages/Dashboard";
 import Ranking from "./pages/Ranking";
-import Validator from "./pages/Validator";
 
 import type { ApiResponse, FilterState } from "./types";
 
 function App() {
+  // Estados globais usados apenas pelo Dashboard
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState("");
@@ -37,8 +37,7 @@ function App() {
     setLoading(true);
 
     try {
-      // CORREÇÃO: Usando 'api' em vez de 'axios' e removendo a URL completa
-      // O 'api' já sabe qual é a URL base (localhost ou render)
+      // Usa a instância 'api' que já tem a URL base correta
       const response = await api.get<ApiResponse>("/api/search_api", {
         params: {
           di: currentFilters.di.split("/").reverse().join("-"),
@@ -59,12 +58,13 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="flex min-h-screen bg-slate-50">
         <Menu />
 
         <div className="flex-1 ml-64 transition-all duration-300">
           <Routes>
+            {/* O Dashboard continua recebendo os dados globais */}
             <Route
               path="/"
               element={
@@ -79,18 +79,15 @@ function App() {
               }
             />
 
-            <Route path="/validator" element={<Validator />} />
+            {/* O Ranking agora é independente (busca seus próprios dados) */}
+            <Route path="/ranking" element={<Ranking />} />
 
-            <Route
-              path="/ranking"
-              element={<Ranking data={data} loading={loading} />}
-            />
-
+            {/* Qualquer rota desconhecida volta pro início */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
