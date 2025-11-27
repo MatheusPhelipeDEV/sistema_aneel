@@ -308,6 +308,10 @@ def api_search_api():
         print(f"🟥 Erro REAL: {repr(e)}")
         return jsonify({"error": str(e)}), 504 
 
+@app.route("/")
+def index():
+    return jsonify({"status": "online", "message": "API Estalk PowerMap v5.1 Online"})
+
 @app.route("/api/export")
 def api_export():
     # ... (Manter igual, código de exportação)
@@ -347,6 +351,7 @@ def api_export():
         return send_file(data, as_attachment=True, download_name=f"export_{di}_{df}.csv", mimetype="text/csv")
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
