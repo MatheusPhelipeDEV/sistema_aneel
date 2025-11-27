@@ -21,7 +21,6 @@ import { StatCard } from "../components/StatCard";
 import { ChartsSection } from "../components/ChartsSection";
 import { MapSection } from "../components/MapSection";
 
-// Força o TypeScript a aceitar window
 declare const window: any;
 
 interface DashboardProps {
@@ -152,7 +151,8 @@ export default function Dashboard({
   };
 
   const handleExport = (fmt: "xlsx" | "csv") => {
-    if (!filters.di || !filters.df) return window.alert("Preencha as datas.");
+    if (!filters.di || !filters.df)
+      return (window as any).alert("Preencha as datas.");
     const params = new URLSearchParams({
       di: filters.di.split("/").reverse().join("-"),
       df: filters.df.split("/").reverse().join("-"),
@@ -175,18 +175,13 @@ export default function Dashboard({
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
-      <div className="flex justify-between items-center mb-6">
+      {/* Cabeçalho Limpo */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Visão Geral</h2>
           <p className="text-slate-500">
             Monitore as interrupções de energia em tempo real.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold border border-green-200 flex items-center gap-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>{" "}
-            Sistema Online
-          </span>
         </div>
       </div>
 
@@ -477,7 +472,6 @@ export default function Dashboard({
                               </span>
                             </div>
                             <div className="p-3 bg-white border border-slate-200 rounded-lg">
-                              {/* CORREÇÃO AQUI: Removi o 'block' e deixei apenas 'flex' */}
                               <span className="text-xs font-semibold text-slate-400 uppercase mb-1 flex items-center gap-1">
                                 <MapPin size={12} /> Conjunto / UC
                               </span>

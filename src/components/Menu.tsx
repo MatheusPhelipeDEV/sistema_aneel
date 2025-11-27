@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Trophy, Zap, FileText } from "lucide-react";
+import { LayoutDashboard, Trophy, Zap } from "lucide-react";
 
 export function Menu() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -20,7 +20,7 @@ export function Menu() {
             PowerMap
           </h1>
           <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
-            v5.0 Open
+            v5.1 Stable
           </p>
         </div>
       </div>
@@ -33,11 +33,6 @@ export function Menu() {
         <NavLink to="/" className={linkClass}>
           <LayoutDashboard size={20} />
           <span>Visão Geral</span>
-        </NavLink>
-
-        <NavLink to="/validator" className={linkClass}>
-          <FileText size={20} />
-          <span>Validador Jurídico</span>
         </NavLink>
 
         <NavLink to="/ranking" className={linkClass}>

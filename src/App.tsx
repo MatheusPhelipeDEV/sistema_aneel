@@ -2,17 +2,13 @@ import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 
-// Componentes
 import { Menu } from "./components/Menu";
 import Dashboard from "./pages/Dashboard";
 import Ranking from "./pages/Ranking";
-import Validator from "./pages/Validator";
 
-// Tipos
 import type { ApiResponse, FilterState } from "./types";
 
 function App() {
-  // ESTADOS DE DADOS (BUSCA)
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState("");
@@ -25,7 +21,6 @@ function App() {
     pageSize: 1000,
   });
 
-  // AÇÃO DE BUSCA (GLOBAL)
   const handleSearch = async (overrideFilters?: Partial<FilterState>) => {
     const currentFilters = { ...filters, ...overrideFilters };
 
@@ -64,13 +59,9 @@ function App() {
   return (
     <BrowserRouter>
       <div className="flex min-h-screen bg-slate-50">
-        {/* Menu Lateral Simplificado */}
         <Menu />
-
-        {/* Área de Conteúdo */}
         <div className="flex-1 ml-64 transition-all duration-300">
           <Routes>
-            {/* ROTA 1: VISÃO GERAL (Dashboard) */}
             <Route
               path="/"
               element={
@@ -85,16 +76,11 @@ function App() {
               }
             />
 
-            {/* ROTA 2: VALIDADOR JURÍDICO */}
-            <Route path="/validator" element={<Validator />} />
-
-            {/* ROTA 3: RANKING */}
             <Route
               path="/ranking"
               element={<Ranking data={data} loading={loading} />}
             />
 
-            {/* Qualquer rota desconhecida volta pro início */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
