@@ -37,7 +37,7 @@ export function Menu() {
 
         <NavLink to="/ranking" className={linkClass}>
           <Trophy size={20} />
-          <span>Ranking Top 10</span>
+          <span>Ranking</span>
         </NavLink>
       </nav>
 

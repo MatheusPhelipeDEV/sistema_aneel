@@ -2,18 +2,18 @@ import { useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Interruption } from "../types";
-
 import L from "leaflet";
-import icon from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Configuração do ícone padrão do Leaflet
+// --- CORREÇÃO DOS ÍCONES (USANDO CDN PARA NÃO QUEBRAR) ---
 const DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 L.Marker.prototype.options.icon = DefaultIcon;
@@ -49,8 +49,6 @@ const STATE_COORDS: Record<string, [number, number]> = {
   TO: [-9.46, -48.49],
 };
 
-// Mapeamento simples de Agentes -> Estados (Principais Distribuidoras)
-// Isso ajuda a "adivinhar" o estado já que a API não manda a UF explícita
 const AGENT_TO_STATE: Record<string, string> = {
   COPEL: "PR",
   CELESC: "SC",
@@ -93,28 +91,22 @@ interface MapSectionProps {
 }
 
 export function MapSection({ data }: MapSectionProps) {
-  // Centro aproximado do Brasil para visão inicial
   const centerPosition: [number, number] = [-14.235, -51.9253];
 
-  // Processamento dos dados para agrupar por Estado
   const markersData = useMemo(() => {
     const counts: Record<string, number> = {};
 
     data.forEach((item) => {
-      let uf = "BR"; // Default
+      let uf = "BR";
       const name = (item.NomAgenteRegulado || "").toUpperCase();
       const sigla = (item.SigAgente || "").toUpperCase();
 
-      // 1. Tenta achar pelo nome mapeado
       const foundKey = Object.keys(AGENT_TO_STATE).find((key) =>
         name.includes(key)
       );
       if (foundKey) {
         uf = AGENT_TO_STATE[foundKey];
-      }
-      // 2. Tenta achar pela sigla se tiver 2 letras no final (ex: "CEMIG-D") - menos preciso, mas ajuda
-      else if (sigla.length > 0) {
-        // Lógica de fallback simples
+      } else if (sigla.length > 0) {
         if (name.includes("PARANÁ") || name.includes("COPEL")) uf = "PR";
         else if (name.includes("SANTA CATARINA") || name.includes("CELESC"))
           uf = "SC";
@@ -124,7 +116,6 @@ export function MapSection({ data }: MapSectionProps) {
           uf = "SP";
         else if (name.includes("RIO DE JANEIRO")) uf = "RJ";
         else if (name.includes("RIO GRANDE DO SUL")) uf = "RS";
-        // Adicione mais regras aqui se necessário
       }
 
       if (STATE_COORDS[uf]) {
@@ -132,7 +123,6 @@ export function MapSection({ data }: MapSectionProps) {
       }
     });
 
-    // Transforma o objeto counts em array para o mapa
     return Object.entries(counts).map(([uf, count]) => ({
       uf,
       count,
@@ -152,10 +142,11 @@ export function MapSection({ data }: MapSectionProps) {
       </div>
 
       <div className="h-[400px] w-full rounded-xl overflow-hidden border border-slate-200 relative z-0">
+        {/* CORREÇÃO DO SCROLL: scrollWheelZoom={true} */}
         <MapContainer
           center={centerPosition}
           zoom={4}
-          scrollWheelZoom={false}
+          scrollWheelZoom={true}
           style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
@@ -163,7 +154,6 @@ export function MapSection({ data }: MapSectionProps) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* Renderiza um marcador para cada estado com ocorrências */}
           {markersData.map((marker) => (
             <Marker key={marker.uf} position={marker.position}>
               <Popup>

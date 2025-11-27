@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import axios from "axios";
 import {
   Search,
   Download,
@@ -14,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   XCircle,
+  WifiOff,
+  List,
 } from "lucide-react";
 
 import type { ApiResponse, FilterState } from "../types";
@@ -56,6 +59,25 @@ export default function Dashboard({
   const [localFilter, setLocalFilter] = useState("");
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [severityFilter, setSeverityFilter] = useState<string | null>(null);
+
+  const [serverStatus, setServerStatus] = useState<
+    "online" | "offline" | "checking"
+  >("checking");
+
+  useEffect(() => {
+    const checkServer = async () => {
+      try {
+        await axios.get("http://localhost:5000/health", { timeout: 2000 });
+        setServerStatus("online");
+      } catch {
+        setServerStatus("offline");
+      }
+    };
+
+    checkServer();
+    const interval = setInterval(checkServer, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") onSearch();
@@ -175,13 +197,36 @@ export default function Dashboard({
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
-      {/* Cabeçalho Limpo */}
+      {/* Cabeçalho */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Visão Geral</h2>
           <p className="text-slate-500">
             Monitore as interrupções de energia em tempo real.
           </p>
+        </div>
+
+        <div
+          className={`px-4 py-2 rounded-full text-sm font-bold border flex items-center gap-2 transition-colors ${
+            serverStatus === "online"
+              ? "bg-green-100 text-green-700 border-green-200"
+              : "bg-red-100 text-red-700 border-red-200"
+          }`}
+        >
+          {serverStatus === "online" ? (
+            <>
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              Sistema Online
+            </>
+          ) : (
+            <>
+              <WifiOff size={16} />
+              Servidor Offline
+            </>
+          )}
         </div>
       </div>
 
@@ -218,7 +263,8 @@ export default function Dashboard({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* GRID ALTERADO PARA 5 COLUNAS PARA CABER O NOVO FILTRO */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-600 flex items-center gap-1">
               <Calendar size={14} /> Data Inicial
@@ -277,6 +323,27 @@ export default function Dashboard({
               }
               onKeyDown={handleKeyDown}
             />
+          </div>
+
+          {/* NOVO FILTRO: Itens por Página */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-600 flex items-center gap-1">
+              <List size={14} /> Itens por Pág.
+            </label>
+            <select
+              className="w-full p-2.5 border border-slate-300 rounded-lg bg-white"
+              value={filters.pageSize}
+              // Garante que atualiza o filtro e limita visualmente a 100
+              onChange={(e: any) =>
+                setFilters({ ...filters, pageSize: parseInt(e.target.value) })
+              }
+              onKeyDown={handleKeyDown}
+            >
+              <option value="10">10 itens</option>
+              <option value="20">20 itens</option>
+              <option value="50">50 itens</option>
+              <option value="100">100 itens (Máx)</option>
+            </select>
           </div>
         </div>
 
