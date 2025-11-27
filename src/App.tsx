@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import axios from "axios";
+
+// CORREÇÃO: Importando do caminho certo (mesma pasta)
+import { api } from "./api";
 
 import { Menu } from "./components/Menu";
 import Dashboard from "./pages/Dashboard";
 import Ranking from "./pages/Ranking";
+import Validator from "./pages/Validator";
 
 import type { ApiResponse, FilterState } from "./types";
 
@@ -34,22 +37,21 @@ function App() {
     setLoading(true);
 
     try {
-      const response = await axios.get<ApiResponse>(
-        "http://localhost:5000/api/search_api",
-        {
-          params: {
-            di: currentFilters.di.split("/").reverse().join("-"),
-            df: currentFilters.df.split("/").reverse().join("-"),
-            modo: currentFilters.modo,
-            unidade: currentFilters.termo,
-            page: 1,
-            page_size: currentFilters.pageSize,
-          },
-        }
-      );
+      // CORREÇÃO: Usando 'api' em vez de 'axios' e removendo a URL completa
+      // O 'api' já sabe qual é a URL base (localhost ou render)
+      const response = await api.get<ApiResponse>("/api/search_api", {
+        params: {
+          di: currentFilters.di.split("/").reverse().join("-"),
+          df: currentFilters.df.split("/").reverse().join("-"),
+          modo: currentFilters.modo,
+          unidade: currentFilters.termo,
+          page: 1,
+          page_size: currentFilters.pageSize,
+        },
+      });
       setData(response.data);
     } catch (err) {
-      setError("Erro ao buscar dados. Verifique se o app.py está rodando.");
+      setError("Erro ao buscar dados. Verifique se o servidor está rodando.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -60,6 +62,7 @@ function App() {
     <BrowserRouter>
       <div className="flex min-h-screen bg-slate-50">
         <Menu />
+
         <div className="flex-1 ml-64 transition-all duration-300">
           <Routes>
             <Route
@@ -75,6 +78,8 @@ function App() {
                 />
               }
             />
+
+            <Route path="/validator" element={<Validator />} />
 
             <Route
               path="/ranking"
