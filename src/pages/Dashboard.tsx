@@ -22,7 +22,6 @@ import type { ApiResponse, FilterState } from "../types";
 import { StatCard } from "../components/StatCard";
 import { ChartsSection } from "../components/ChartsSection";
 import { MapSection } from "../components/MapSection";
-// Importamos a API_BASE_URL para o botão de exportar saber onde buscar
 import { api, API_BASE_URL } from "../api";
 
 declare const window: any;
@@ -182,12 +181,10 @@ export default function Dashboard({
       df: filters.df.split("/").reverse().join("-"),
       modo: filters.modo,
       unidade: filters.termo,
-      // Passa o filtro local para o Python filtrar antes de gerar
       local_filter: localFilter,
       fmt,
     });
 
-    // CORREÇÃO: Usa API_BASE_URL para funcionar tanto local quanto no Render
     window.open(`${API_BASE_URL}/api/export?${params.toString()}`, "_blank");
   };
 
@@ -199,8 +196,8 @@ export default function Dashboard({
   };
 
   return (
-    // AJUSTE: Padding maior para afastar do menu
-    <div className="space-y-6 p-8 pb-12 animate-fade-in">
+    // AJUSTE 1: Aumentei o padding horizontal para px-12 (mais afastado do menu)
+    <div className="space-y-6 px-12 py-8 pb-12 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Visão Geral</h2>
@@ -327,7 +324,6 @@ export default function Dashboard({
             />
           </div>
 
-          {/* Filtro de Itens por Página */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-600 flex items-center gap-1">
               <List size={14} /> Itens por Pág.
@@ -451,8 +447,8 @@ export default function Dashboard({
               <tr>
                 <th className="w-12 px-4 py-3"></th>
                 <th className="w-32 px-6 py-3 font-medium">Data</th>
-                {/* AJUSTE: Coluna de Registro mais larga (w-48) */}
-                <th className="w-48 px-6 py-3 font-medium">Registro</th>
+                {/* AJUSTE 2: Largura fixa e maior (w-56) para a coluna de registro */}
+                <th className="w-56 px-6 py-3 font-medium">Registro</th>
                 <th className="px-6 py-3 font-medium">
                   {filters.modo === "cia" ? "Companhia" : "Unidade"}
                 </th>
@@ -507,13 +503,17 @@ export default function Dashboard({
                       <td className="px-6 py-3 font-medium text-slate-700 align-middle">
                         {item.dia}
                       </td>
-                      {/* AJUSTE: Sem quebra de linha no registro */}
+
+                      {/* AJUSTE 3: whitespace-nowrap na célula + div com truncate e largura fixa (w-48) */}
                       <td
                         className="px-6 py-3 text-slate-600 align-middle font-mono text-xs whitespace-nowrap"
                         title={item.NumOrdemInterrupcao}
                       >
-                        {item.NumOrdemInterrupcao}
+                        <div className="w-48 truncate">
+                          {item.NumOrdemInterrupcao}
+                        </div>
                       </td>
+
                       <td className="px-6 py-3 text-slate-600 font-medium align-middle">
                         {filters.modo === "cia"
                           ? item.NomAgenteRegulado

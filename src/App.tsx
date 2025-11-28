@@ -1,7 +1,5 @@
 import { useState } from "react";
-// Usando HashRouter para compatibilidade total com GitHub Pages
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
-// Importando a configuração da API (que define se é localhost ou render)
 import { api } from "./api";
 
 import { Menu } from "./components/Menu";
@@ -11,7 +9,7 @@ import Ranking from "./pages/Ranking";
 import type { ApiResponse, FilterState } from "./types";
 
 function App() {
-  // Estados globais usados apenas pelo Dashboard
+  // --- ESTADOS GLOBAIS ---
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState("");
@@ -24,6 +22,7 @@ function App() {
     pageSize: 1000,
   });
 
+  // --- FUNÇÃO DE BUSCA ---
   const handleSearch = async (overrideFilters?: Partial<FilterState>) => {
     const currentFilters = { ...filters, ...overrideFilters };
 
@@ -37,7 +36,6 @@ function App() {
     setLoading(true);
 
     try {
-      // Usa a instância 'api' que já tem a URL base correta
       const response = await api.get<ApiResponse>("/api/search_api", {
         params: {
           di: currentFilters.di.split("/").reverse().join("-"),
@@ -50,8 +48,8 @@ function App() {
       });
       setData(response.data);
     } catch (err) {
-      setError("Erro ao buscar dados. Verifique se o servidor está rodando.");
       console.error(err);
+      setError("Erro ao buscar dados. Verifique se o servidor está online.");
     } finally {
       setLoading(false);
     }
@@ -60,11 +58,12 @@ function App() {
   return (
     <HashRouter>
       <div className="flex min-h-screen bg-slate-50">
+        {/* Menu Lateral sem props de login */}
         <Menu />
 
+        {/* Área Principal */}
         <div className="flex-1 ml-64 transition-all duration-300">
           <Routes>
-            {/* O Dashboard continua recebendo os dados globais */}
             <Route
               path="/"
               element={
@@ -79,10 +78,9 @@ function App() {
               }
             />
 
-            {/* O Ranking agora é independente (busca seus próprios dados) */}
+            {/* Se o seu Ranking.tsx esperar props, adicione: data={data} loading={loading} */}
             <Route path="/ranking" element={<Ranking />} />
 
-            {/* Qualquer rota desconhecida volta pro início */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
