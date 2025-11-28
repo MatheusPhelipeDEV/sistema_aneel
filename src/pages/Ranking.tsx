@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useMemo } from "react";
+// CORREÇÃO: Removi 'useMemo' que não estava sendo usado
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -17,12 +18,10 @@ import {
   Search,
   Calendar,
   Zap,
-  Download,
 } from "lucide-react";
-import { api } from "../api"; // Usando a configuração centralizada
+import { api } from "../api";
 import type { ApiResponse } from "../types";
 
-// Força o TypeScript a aceitar window
 declare const window: any;
 
 const getFormattedDate = (daysAgo = 0) => {
@@ -37,8 +36,7 @@ export default function Ranking() {
     { name: string; value: number }[]
   >([]);
 
-  // Filtros próprios da página de Ranking
-  const [di, setDi] = useState(getFormattedDate(30)); // Padrão: Últimos 30 dias
+  const [di, setDi] = useState(getFormattedDate(30));
   const [df, setDf] = useState(getFormattedDate(0));
 
   const fetchData = async () => {
@@ -49,20 +47,18 @@ export default function Ranking() {
           di: di.split("/").reverse().join("-"),
           df: df.split("/").reverse().join("-"),
           modo: "cia",
-          page_size: 9999, // Busca massiva para garantir precisão do ranking
+          page_size: 9999,
         },
       });
 
       const data = response.data.data;
 
-      // Agrupa os dados
       const countMap = data.reduce((acc, curr) => {
         const name = curr.NomAgenteRegulado || "Desconhecido";
         acc[name] = (acc[name] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      // Ordena e pega Top 10
       const sorted = Object.entries(countMap)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
@@ -77,7 +73,6 @@ export default function Ranking() {
     }
   };
 
-  // Carrega dados ao entrar na tela
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,7 +80,6 @@ export default function Ranking() {
 
   return (
     <div className="space-y-6 p-8 pb-12 animate-fade-in">
-      {/* Cabeçalho */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-yellow-100 text-yellow-600 rounded-xl shadow-sm">
@@ -102,7 +96,6 @@ export default function Ranking() {
         </div>
       </div>
 
-      {/* Painel de Filtros */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
         <div className="w-full md:w-48 space-y-1">
           <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
@@ -142,7 +135,6 @@ export default function Ranking() {
         </button>
       </div>
 
-      {/* Conteúdo Visual */}
       {loading ? (
         <div className="h-64 flex flex-col items-center justify-center text-slate-400 gap-3 bg-white rounded-2xl border border-dashed border-slate-300">
           <Loader2 size={40} className="animate-spin text-blue-500" />
@@ -155,7 +147,6 @@ export default function Ranking() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Gráfico */}
           <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <h3 className="font-semibold text-slate-700 mb-6 flex items-center justify-between">
               <span>Top 10 Visual</span>
@@ -206,7 +197,6 @@ export default function Ranking() {
             </div>
           </div>
 
-          {/* Lista Detalhada */}
           <div className="bg-white p-0 rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
             <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
               <h3 className="font-semibold text-slate-700">

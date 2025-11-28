@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect } from "react";
-import axios from "axios";
 import {
   Search,
   Download,
@@ -23,6 +22,8 @@ import type { ApiResponse, FilterState } from "../types";
 import { StatCard } from "../components/StatCard";
 import { ChartsSection } from "../components/ChartsSection";
 import { MapSection } from "../components/MapSection";
+// Importamos a API_BASE_URL para o botão de exportar saber onde buscar
+import { api, API_BASE_URL } from "../api";
 
 declare const window: any;
 
@@ -67,7 +68,7 @@ export default function Dashboard({
   useEffect(() => {
     const checkServer = async () => {
       try {
-        await axios.get("http://localhost:5000/health", { timeout: 2000 });
+        await api.get("/health", { timeout: 2000 });
         setServerStatus("online");
       } catch {
         setServerStatus("offline");
@@ -175,17 +176,19 @@ export default function Dashboard({
   const handleExport = (fmt: "xlsx" | "csv") => {
     if (!filters.di || !filters.df)
       return (window as any).alert("Preencha as datas.");
+
     const params = new URLSearchParams({
       di: filters.di.split("/").reverse().join("-"),
       df: filters.df.split("/").reverse().join("-"),
       modo: filters.modo,
       unidade: filters.termo,
+      // Passa o filtro local para o Python filtrar antes de gerar
+      local_filter: localFilter,
       fmt,
     });
-    window.open(
-      `http://localhost:5000/api/export?${params.toString()}`,
-      "_blank"
-    );
+
+    // CORREÇÃO: Usa API_BASE_URL para funcionar tanto local quanto no Render
+    window.open(`${API_BASE_URL}/api/export?${params.toString()}`, "_blank");
   };
 
   const severityLabels: Record<string, string> = {
@@ -196,7 +199,7 @@ export default function Dashboard({
   };
 
   return (
-    // AJUSTE 1: Aumentei o padding (p-8) e adicionei pt-8 para afastar do topo/menu
+    // AJUSTE: Padding maior para afastar do menu
     <div className="space-y-6 p-8 pb-12 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
@@ -324,6 +327,7 @@ export default function Dashboard({
             />
           </div>
 
+          {/* Filtro de Itens por Página */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-600 flex items-center gap-1">
               <List size={14} /> Itens por Pág.
@@ -447,7 +451,7 @@ export default function Dashboard({
               <tr>
                 <th className="w-12 px-4 py-3"></th>
                 <th className="w-32 px-6 py-3 font-medium">Data</th>
-                {/* AJUSTE 2: Aumentei a largura da coluna Registro para w-48 */}
+                {/* AJUSTE: Coluna de Registro mais larga (w-48) */}
                 <th className="w-48 px-6 py-3 font-medium">Registro</th>
                 <th className="px-6 py-3 font-medium">
                   {filters.modo === "cia" ? "Companhia" : "Unidade"}
@@ -503,15 +507,13 @@ export default function Dashboard({
                       <td className="px-6 py-3 font-medium text-slate-700 align-middle">
                         {item.dia}
                       </td>
-
-                      {/* AJUSTE 3: Adicionei whitespace-nowrap para não quebrar o número */}
+                      {/* AJUSTE: Sem quebra de linha no registro */}
                       <td
                         className="px-6 py-3 text-slate-600 align-middle font-mono text-xs whitespace-nowrap"
                         title={item.NumOrdemInterrupcao}
                       >
                         {item.NumOrdemInterrupcao}
                       </td>
-
                       <td className="px-6 py-3 text-slate-600 font-medium align-middle">
                         {filters.modo === "cia"
                           ? item.NomAgenteRegulado

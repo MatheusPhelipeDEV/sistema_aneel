@@ -13,7 +13,7 @@ const isLocalhost =
   window.location.hostname === "127.0.0.1";
 
 export const API_BASE_URL = isLocalhost
-  ? "http://localhost:5000"
+  ? "http://localhost:5001"
   : "https://sistema-aneel.onrender.com";
 
 export const api = axios.create({
